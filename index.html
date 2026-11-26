@@ -26,9 +26,14 @@
     .btn-secondary { background: #fff; color: #0E5346; border: 1px solid #0E5346; margin-top: 16px; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #111; }
-    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
-    .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
-    .result-qr { width: 160px; height: 160px; display: block; margin: 16px auto; border: 1px solid #eee; border-radius: 8px; object-fit: contain; background: #f9f9f9; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0E5346; outline: none; background: #fff; }
+    
+    /* 结果页详细标准样式 */
+    .criteria-box { background: #f9f9f9; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; font-size: 13px; }
+    .criteria-title { font-weight: bold; margin-bottom: 6px; color: #333; }
+    .criteria-list { padding-left: 18px; color: #666; margin-bottom: 12px; }
+    
     .hide { display: none !important; }
     .form-section-title { font-size: 15px; color: #0E5346; font-weight: bold; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
     .form-section-title:first-child { margin-top: 0; }
@@ -87,6 +92,13 @@
       <div class="form-section-title">病史与既往研究</div>
       <div class="form-group"><label>是否存在肝硬化 <span style="color:red">*</span></label><select id="cirrhosis"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
       <div class="form-group"><label>是否存在肝癌 <span style="color:red">*</span></label><select id="hcc"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
+      
+      <!-- 新增：既往合并疾病 -->
+      <div class="form-group">
+        <label>既往是否有其他合并疾病？</label>
+        <textarea id="comorbidities" rows="2" placeholder="如：高血压、糖尿病、冠心病等，若没有请填“无”"></textarea>
+      </div>
+
       <div class="form-group"><label>既往是否参加过临床研究 <span style="color:red">*</span></label><select id="prior_trial"><option value="">请选择</option><option value="是">是</option><option value="否">否</option></select></div>
       <div class="form-group hide" id="prior_drug_group"><label>药物名称</label><input type="text" id="prior_trial_drug" placeholder="非必填"></div>
       <div class="form-group hide" id="prior_dose_group"><label>最后一次用药距今 (月)</label><input type="number" id="prior_trial_last_dose" placeholder="例如：6"></div>
@@ -100,7 +112,7 @@
   <div id="view-result" class="page-container">
     <div class="card">
       <div class="card-title" style="color: #0E5346;">匹配结果</div>
-      <div class="card-desc">基于您填写的指标，以下项目初步符合条件。如需了解项目详细情况，请关注"东方医院感染科"微信公众号，最终是否符合以研究医生评估为准。</div>
+      <div class="card-desc">基于您填写的指标，以下项目初步符合条件。如需了解项目详细情况，可关注“上海市东方医院感染科”微信公众号，最终是否符合以研究医生评估为准。</div>
       <div id="result-list"></div>
       <button class="btn-primary btn-secondary" onclick="switchView('view-home')" style="margin-top: 24px;">重新匹配</button>
     </div>
@@ -117,7 +129,6 @@
   </div>
 
   <script>
-    // ====== 1. 全局变量与安全加载 ======
     let allProjects = [];
 
     fetch('projects.json?v=' + Date.now())
@@ -128,14 +139,12 @@
       })
       .catch(err => console.error("项目数据加载失败：", err));
 
-    // ====== 2. 页面切换 ======
     function switchView(viewId) {
       document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
       window.scrollTo(0, 0); 
     }
 
-    // ====== 3. 列表展示 ======
     function showProjectList() {
       const activeProjects = allProjects.filter(p => p.status === 'active');
       const listContainer = document.getElementById('all-projects-list');
@@ -147,7 +156,6 @@
       switchView('view-list');
     }
 
-    // ====== 4. 安全表单联动 ======
     const bindEvent = (id, event, fn) => {
       const el = document.getElementById(id);
       if (el) el.addEventListener(event, fn);
@@ -155,41 +163,33 @@
 
     bindEvent('hbv_dna_status', 'change', function(e) {
       const group = document.getElementById('dna_value_group');
-      if(group) {
-        if (e.target.value === '检测到') group.classList.remove('hide');
-        else group.classList.add('hide');
-      }
+      if(group) group.style.display = (e.target.value === '检测到') ? 'block' : 'none';
     });
     
     bindEvent('avt_status', 'change', function(e) {
       const isNever = (e.target.value === '从未抗病毒' || e.target.value === '');
-      const durGroup = document.getElementById('avt_duration_group');
-      const curGroup = document.getElementById('avt_current_group');
-      if(durGroup) {
-        if (isNever) durGroup.classList.add('hide');
-        else durGroup.classList.remove('hide');
-      }
-      if(curGroup) {
-        if (isNever) curGroup.classList.add('hide');
-        else curGroup.classList.remove('hide');
-      }
+      document.getElementById('avt_duration_group').style.display = isNever ? 'none' : 'block';
+      document.getElementById('avt_current_group').style.display = isNever ? 'none' : 'block';
     });
 
     bindEvent('prior_trial', 'change', function(e) {
       const isYes = (e.target.value === '是');
-      const drugGroup = document.getElementById('prior_drug_group');
-      const doseGroup = document.getElementById('prior_dose_group');
-      if(drugGroup) {
-        if (isYes) drugGroup.classList.remove('hide');
-        else drugGroup.classList.add('hide');
-      }
-      if(doseGroup) {
-        if (isYes) doseGroup.classList.remove('hide');
-        else doseGroup.classList.add('hide');
-      }
+      document.getElementById('prior_drug_group').style.display = isYes ? 'block' : 'none';
+      document.getElementById('prior_dose_group').style.display = isYes ? 'block' : 'none';
     });
 
-    // ====== 5. 匹配逻辑 ======
+    // 复制微信号功能
+    function copyWechat(text) {
+      if (text === "未填写微信号") return;
+      var input = document.createElement("textarea");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      alert("微信号已复制：" + text + "\n请打开微信搜索添加");
+    }
+
     function doMatch() {
       try {
         const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
@@ -211,6 +211,7 @@
           ifn_status: getVal('ifn_status'),
           cirrhosis: getVal('cirrhosis'),
           hcc: getVal('hcc'),
+          comorbidities: getVal('comorbidities'),
           prior_trial: getVal('prior_trial'),
           prior_trial_last_dose: getNum('prior_trial_last_dose')
         };
@@ -240,38 +241,84 @@
           let isMatch = true;
           let isUnknown = false;
 
-          let rulesList = [];
+          // 解析规则
+          let incRules = [], excRules = [];
           try {
-            if (typeof project.rules === 'string') {
-              rulesList = JSON.parse(project.rules);
-            } else if (Array.isArray(project.rules)) {
-              rulesList = project.rules;
+            // 兼容旧格式（只有 rules）
+            if (project.rules) {
+              incRules = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
             }
-          } catch (e) {
-            console.error("项目规则格式有误，无法解析:", project.name);
-            rulesList = [];
-          }
+            if (project.includeRules) {
+              incRules = typeof project.includeRules === 'string' ? JSON.parse(project.includeRules) : project.includeRules;
+            }
+            if (project.excludeRules) {
+              excRules = typeof project.excludeRules === 'string' ? JSON.parse(project.excludeRules) : project.excludeRules;
+            }
+          } catch (e) { console.error("规则解析失败:", project.name); }
 
-          rulesList.forEach(rule => {
+          let matchedIncDesc = [], matchedExcDesc = [];
+
+          // 1. 检查入选标准 (必须全部满足)
+          incRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
             if (val === undefined || val === null) return; 
+            
+            let pass = true;
+            if (rule.op === 'eq' && String(val) !== String(rule.value)) pass = false;
+            if (rule.op === 'lte' && val > rule.value) pass = false;
+            if (rule.op === 'gte' && val < rule.value) pass = false;
+            if (rule.op === 'between' && (val < rule.value || val > rule.value2)) pass = false;
+            
+            if (!pass) isMatch = false;
+            if (pass && rule.desc) matchedIncDesc.push(rule.desc);
+          });
 
-            if (rule.op === 'eq' && String(val) !== String(rule.value)) isMatch = false;
-            if (rule.op === 'lte' && val > rule.value) isMatch = false;
-            if (rule.op === 'gte' && val < rule.value) isMatch = false;
-            if (rule.op === 'between' && (val < rule.value || val > rule.value2)) isMatch = false;
+          // 2. 检查排除标准 (只要命中一条即被排除)
+          excRules.forEach(rule => {
+            const val = p[rule.field];
+            if (val === '不清楚') { isUnknown = true; return; }
+            if (val === undefined || val === null) return;
+
+            let hit = false;
+            if (rule.op === 'eq' && String(val) === String(rule.value)) hit = true;
+            if (rule.op === 'lte' && val <= rule.value) hit = true;
+            if (rule.op === 'gte' && val >= rule.value) hit = true;
+            if (rule.op === 'between' && (val >= rule.value && val <= rule.value2)) hit = true;
+            
+            if (hit) isMatch = false; // 命中排除标准，直接淘汰
+            if (!hit && rule.desc) matchedExcDesc.push(rule.desc); // 没命中，记录下来展示
           });
 
           if (isMatch && !isUnknown) {
             matchCount++;
-            
-                     // 获取微信号（如果没有填，给个默认提示）
             let wechatId = project.qrCodeUrl || "未填写微信号";
+
+            // 构建详情标准的 HTML
+            let detailHtml = '';
+            if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
+              detailHtml += `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
+                <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
+                <div class="criteria-box">`;
+              
+              if (matchedIncDesc.length > 0) {
+                detailHtml += `<div class="criteria-title">✅ 您满足的入选标准：</div>
+                  <ul class="criteria-list">
+                    ${matchedIncDesc.map(d => `<li>${d}</li>`).join('')}
+                  </ul>`;
+              }
+              if (matchedExcDesc.length > 0) {
+                detailHtml += `<div class="criteria-title">🛡️ 您未触碰的排除标准：</div>
+                  <ul class="criteria-list">
+                    ${matchedExcDesc.map(d => `<li>${d}</li>`).join('')}
+                  </ul>`;
+              }
+              detailHtml += `</div></details>`;
+            }
 
             matchedHtml += `
               <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
-                <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 16px;">${project.name}</h3>
+                <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 18px;">${project.name}</h3>
                 <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请联系研究医生：</p>
                 
                 <div style="background: #F4F6F8; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: #0E5346; letter-spacing: 1px;">
@@ -282,6 +329,8 @@
                   一键复制微信号
                 </button>
                 <p style="font-size: 12px; color: #999; margin-top: 12px;">复制后，请打开微信搜索添加</p>
+                
+                ${detailHtml}
               </div>
             `;
           }
@@ -291,24 +340,13 @@
         if (matchCount > 0) {
           resultList.innerHTML = matchedHtml;
         } else {
-          resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
+          resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或触碰了排除标准）</span></div>';
         }
         switchView('view-result');
       } catch (err) {
         alert("系统错误：" + err.message);
       }
     }
-    // 复制微信号功能
-    function copyWechat(text) {
-      if (text === "未填写微信号") return;
-      // 兼容手机端复制
-      var input = document.createElement("textarea");
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand("copy");
-      document.body.removeChild(input);
-      alert("微信号已复制：" + text + "\n请打开微信搜索添加");
-    }  </script>
+  </script>
 </body>
 </html>
