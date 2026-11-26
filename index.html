@@ -117,7 +117,7 @@
   </div>
 
   <script>
-    let allProjects = [];
+  let allProjects = [];
 
     fetch('projects.json?v=' + Date.now())
       .then(res => res.json())
@@ -125,7 +125,10 @@
         allProjects = Array.isArray(data) ? data : (data.projects || []);
         document.getElementById('stat-active-count').innerText = allProjects.filter(p => p.status === 'active').length;
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        alert("加载项目数据失败，请检查后台配置！");
+      });
 
     function switchView(viewId) {
       document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
@@ -172,76 +175,87 @@
 
     // 执行匹配
     function doMatch() {
-      const p = {
-        age: parseFloat(document.getElementById('age').value),
-        sex: document.getElementById('sex').value,
-        height: parseFloat(document.getElementById('height').value) || 0,
-        weight: parseFloat(document.getElementById('weight').value) || 0,
-        hbeag: document.getElementById('hbeag').value,
-        hbsag: parseFloat(document.getElementById('hbsag').value),
-        hbv_dna_status: document.getElementById('hbv_dna_status').value,
-        hbv_dna_value: parseFloat(document.getElementById('hbv_dna_value').value) || 0,
-        liver_stiffness: parseFloat(document.getElementById('liver_stiffness').value) || 0,
-        avt_status: document.getElementById('avt_status').value,
-        avt_total_duration: document.getElementById('avt_total_duration').value,
-        avt_current_duration: parseFloat(document.getElementById('avt_current_duration').value) || 0,
-        ifn_status: document.getElementById('ifn_status').value,
-        cirrhosis: document.getElementById('cirrhosis').value,
-        hcc: document.getElementById('hcc').value,
-        prior_trial: document.getElementById('prior_trial').value,
-        prior_trial_last_dose: parseFloat(document.getElementById('prior_trial_last_dose').value) || 0
-      };
+      try {
+        const p = {
+          age: parseFloat(document.getElementById('age').value) || 0,
+          sex: document.getElementById('sex').value,
+          height: parseFloat(document.getElementById('height').value) || 0,
+          weight: parseFloat(document.getElementById('weight').value) || 0,
+          hbeag: document.getElementById('hbeag').value,
+          hbsag: parseFloat(document.getElementById('hbsag').value) || 0,
+          hbv_dna_status: document.getElementById('hbv_dna_status').value,
+          hbv_dna_value: parseFloat(document.getElementById('hbv_dna_value').value) || 0,
+          liver_stiffness: parseFloat(document.getElementById('liver_stiffness').value) || 0,
+          avt_status: document.getElementById('avt_status').value,
+          avt_total_duration: document.getElementById('avt_total_duration').value,
+          avt_current_duration: parseFloat(document.getElementById('avt_current_duration').value) || 0,
+          ifn_status: document.getElementById('ifn_status').value,
+          cirrhosis: document.getElementById('cirrhosis').value,
+          hcc: document.getElementById('hcc').value,
+          prior_trial: document.getElementById('prior_trial').value,
+          prior_trial_last_dose: parseFloat(document.getElementById('prior_trial_last_dose').value) || 0
+        };
 
-      // 自动计算 BMI
-      if (p.height > 0 && p.weight > 0) {
-        p.bmi = parseFloat((p.weight / ((p.height / 100) ** 2)).toFixed(1));
-      }
+        // 自动计算 BMI
+        if (p.height > 0 && p.weight > 0) {
+          p.bmi = parseFloat((p.weight / ((p.height / 100) ** 2)).toFixed(1));
+        }
 
-      if (!p.age || !p.sex || !p.hbeag || !p.hbsag || !p.hbv_dna_status || !p.avt_status || !p.ifn_status || !p.cirrhosis || !p.hcc || !p.prior_trial) {
-        alert("请将带 * 号的必填项填写完整");
-        return;
-      }
+        // 必填项严格校验
+        if (p.age === 0) { alert("【年龄】未填写"); return; }
+        if (p.sex === "") { alert("【性别】未选择"); return; }
+        if (p.hbeag === "") { alert("【乙肝e抗原】未选择"); return; }
+        if (document.getElementById('hbsag').value === "") { alert("【乙肝表面抗原定量】未填写"); return; }
+        if (p.hbv_dna_status === "") { alert("【HBV DNA 状态】未选择"); return; }
+        if (p.hbv_dna_status === "检测到" && document.getElementById('hbv_dna_value').value === "") { alert("【HBV DNA 定量】未填写"); return; }
+        if (p.avt_status === "") { alert("【抗病毒治疗情况】未选择"); return; }
+        if (p.ifn_status === "") { alert("【干扰素使用情况】未选择"); return; }
+        if (p.cirrhosis === "") { alert("【是否存在肝硬化】未选择"); return; }
+        if (p.hcc === "") { alert("【是否存在肝癌】未选择"); return; }
+        if (p.prior_trial === "") { alert("【既往是否参加过临床研究】未选择"); return; }
 
-      const activeProjects = allProjects.filter(x => x.status === 'active');
-      let matchedHtml = '';
-      let matchCount = 0;
+        const activeProjects = allProjects.filter(x => x.status === 'active');
+        let matchedHtml = '';
+        let matchCount = 0;
 
-      activeProjects.forEach(project => {
-        let isMatch = true;
-        let isUnknown = false;
+        activeProjects.forEach(project => {
+          let isMatch = true;
+          let isUnknown = false;
 
-        (project.rules || []).forEach(rule => {
-          const val = p[rule.field];
-          if (val === '不清楚') { isUnknown = true; return; }
-          if (val === undefined || val === null) return; // 如果患者没填这个非必填项，跳过
+          (project.rules || []).forEach(rule => {
+            const val = p[rule.field];
+            if (val === '不清楚') { isUnknown = true; return; }
+            if (val === undefined || val === null) return; 
 
-          if (rule.op === 'eq' && String(val) !== String(rule.value)) isMatch = false;
-          if (rule.op === 'lte' && val > rule.value) isMatch = false;
-          if (rule.op === 'gte' && val < rule.value) isMatch = false;
-          if (rule.op === 'between' && (val < rule.value || val > rule.value2)) isMatch = false;
+            if (rule.op === 'eq' && String(val) !== String(rule.value)) isMatch = false;
+            if (rule.op === 'lte' && val > rule.value) isMatch = false;
+            if (rule.op === 'gte' && val < rule.value) isMatch = false;
+            if (rule.op === 'between' && (val < rule.value || val > rule.value2)) isMatch = false;
+          });
+
+          if (isMatch && !isUnknown) {
+            matchCount++;
+            matchedHtml += `
+              <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
+                <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 16px;">${project.name}</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请长按识别或扫码添加研究医生微信：</p>
+                <img src="${project.qrCodeUrl}" class="result-qr" alt="二维码">
+                <p style="font-size: 12px; color: #999;">添加后由研究团队与您沟通</p>
+              </div>
+            `;
+          }
         });
 
-        if (isMatch && !isUnknown) {
-          matchCount++;
-          matchedHtml += `
-            <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
-              <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 16px;">${project.name}</h3>
-              <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请长按识别或扫码添加研究医生微信：</p>
-              <img src="${project.qrCodeUrl}" class="result-qr" alt="二维码">
-              <p style="font-size: 12px; color: #999;">添加后由研究团队与您沟通</p>
-            </div>
-          `;
+        const resultList = document.getElementById('result-list');
+        if (matchCount > 0) {
+          resultList.innerHTML = matchedHtml;
+        } else {
+          resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
         }
-      });
-
-      const resultList = document.getElementById('result-list');
-      if (matchCount > 0) {
-        resultList.innerHTML = matchedHtml;
-      } else {
-        resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
+        switchView('view-result');
+      } catch (error) {
+        // 如果程序崩溃，直接把报错原因弹窗显示出来
+        alert("系统运行出错，请截图发给管理员：\n" + error.message);
+        console.error(error);
       }
-      switchView('view-result');
     }
-  </script>
-</body>
-</html>
