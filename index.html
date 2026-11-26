@@ -28,7 +28,7 @@
     .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #111; }
     .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
     .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
-    .result-qr { width: 160px; height: 160px; display: block; margin: 16px auto; border: 1px solid #eee; border-radius: 8px; }
+    .result-qr { width: 160px; height: 160px; display: block; margin: 16px auto; border: 1px solid #eee; border-radius: 8px; object-fit: contain; background: #f9f9f9; }
     .hide { display: none !important; }
     .form-section-title { font-size: 15px; color: #0E5346; font-weight: bold; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
     .form-section-title:first-child { margin-top: 0; }
@@ -240,18 +240,16 @@
           let isMatch = true;
           let isUnknown = false;
 
-          // 【修复核心】：自动识别并解析规则
           let rulesList = [];
           try {
             if (typeof project.rules === 'string') {
-              // 如果是字符串，尝试将其转为 JSON 数组
               rulesList = JSON.parse(project.rules);
             } else if (Array.isArray(project.rules)) {
               rulesList = project.rules;
             }
           } catch (e) {
             console.error("项目规则格式有误，无法解析:", project.name);
-            rulesList = []; // 解析失败就当没有规则
+            rulesList = [];
           }
 
           rulesList.forEach(rule => {
@@ -267,11 +265,18 @@
 
           if (isMatch && !isUnknown) {
             matchCount++;
+            
+            // 【修复核心】：自动处理图片路径，解决裂图问题
+            let imgSrc = project.qrCodeUrl || "";
+            if (imgSrc.startsWith('/')) {
+              imgSrc = '.' + imgSrc; // 将 /images/... 变为 ./images/...
+            }
+
             matchedHtml += `
               <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
                 <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 16px;">${project.name}</h3>
                 <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请长按识别或扫码添加研究医生微信：</p>
-                <img src="${project.qrCodeUrl}" class="result-qr" alt="二维码">
+                <img src="${imgSrc}" class="result-qr" alt="二维码">
                 <p style="font-size: 12px; color: #999;">添加后由研究团队与您沟通</p>
               </div>
             `;
