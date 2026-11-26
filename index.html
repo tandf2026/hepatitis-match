@@ -154,27 +154,41 @@
       if (el) el.addEventListener(event, fn);
     };
 
-    bindEvent('hbv_dna_status', 'change', function(e) {
+        bindEvent('hbv_dna_status', 'change', function(e) {
       const group = document.getElementById('dna_value_group');
-      if(group) group.style.display = (e.target.value === '检测到') ? 'block' : 'none';
+      if(group) {
+        if (e.target.value === '检测到') group.classList.remove('hide');
+        else group.classList.add('hide');
+      }
     });
     
     bindEvent('avt_status', 'change', function(e) {
       const isNever = (e.target.value === '从未抗病毒' || e.target.value === '');
       const durGroup = document.getElementById('avt_duration_group');
       const curGroup = document.getElementById('avt_current_group');
-      if(durGroup) durGroup.style.display = isNever ? 'none' : 'block';
-      if(curGroup) curGroup.style.display = isNever ? 'none' : 'block';
+      if(durGroup) {
+        if (isNever) durGroup.classList.add('hide');
+        else durGroup.classList.remove('hide');
+      }
+      if(curGroup) {
+        if (isNever) curGroup.classList.add('hide');
+        else curGroup.classList.remove('hide');
+      }
     });
 
     bindEvent('prior_trial', 'change', function(e) {
       const isYes = (e.target.value === '是');
       const drugGroup = document.getElementById('prior_drug_group');
       const doseGroup = document.getElementById('prior_dose_group');
-      if(drugGroup) drugGroup.style.display = isYes ? 'block' : 'none';
-      if(doseGroup) doseGroup.style.display = isYes ? 'block' : 'none';
+      if(drugGroup) {
+        if (isYes) drugGroup.classList.remove('hide');
+        else drugGroup.classList.add('hide');
+      }
+      if(doseGroup) {
+        if (isYes) doseGroup.classList.remove('hide');
+        else doseGroup.classList.add('hide');
+      }
     });
-
     // ====== 5. 匹配逻辑 ======
     function doMatch() {
       try {
