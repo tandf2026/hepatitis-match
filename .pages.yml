@@ -1,0 +1,42 @@
+media:
+  input: "images"
+  output: "/images"
+
+content:
+  - name: projects
+    label: 项目管理
+    type: file
+    path: projects.json
+    list: true
+    fields:
+      - name: id
+        label: 项目ID
+        type: string
+        required: true
+      - name: name
+        label: 项目名称
+        type: string
+        required: true
+      - name: status
+        label: 状态
+        type: select
+        options:
+          values:
+            - active
+            - suspended
+            - ended
+        default: active
+        required: true
+      - name: qrCodeUrl
+        label: 研究者微信号
+        type: string
+        required: true
+      - name: fullCriteria
+        label: 完整入排文字说明(选填)
+        type: text
+        required: false
+        description: "在这里粘贴项目方案里的完整文字版入排标准。"
+      - name: rules
+        label: 自动匹配规则(JSON)
+        type: text
+        required: true
