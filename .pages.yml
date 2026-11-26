@@ -32,6 +32,6 @@ content:
         type: image
         required: true
       - name: rules
-        label: 入排规则（JSON）
-        type: code
+        label: 入排规则（JSON格式）
+        type: text
         required: false
