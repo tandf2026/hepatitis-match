@@ -31,11 +31,12 @@ content:
         label: 研究者微信号
         type: string
         required: true
-      - name: includeRules
-        label: 入选标准 (必须是数组)
-        type: text
-        required: true
-      - name: excludeRules
-        label: 排除标准 (必须是数组)
+      - name: fullCriteria
+        label: 完整入排文字说明(选填)
         type: text
         required: false
+        description: "在这里粘贴项目方案里的完整文字版入排标准，前端会展示给患者。"
+      - name: rules
+        label: 自动匹配规则(JSON)
+        type: text
+        required: true
