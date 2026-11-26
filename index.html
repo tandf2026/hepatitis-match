@@ -298,6 +298,17 @@
         alert("系统错误：" + err.message);
       }
     }
-  </script>
+    // 复制微信号功能
+    function copyWechat(text) {
+      if (text === "未填写微信号") return;
+      // 兼容手机端复制
+      var input = document.createElement("textarea");
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      alert("微信号已复制：" + text + "\n请打开微信搜索添加");
+    }  </script>
 </body>
 </html>
