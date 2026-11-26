@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>乙肝新药项目匹配</title>
+  <style>
+    /* 基础重置与字体 */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #F4F6F8; 
+      color: #333;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* 顶部导航栏 */
+    .nav-bar {
+      background: #fff;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #EEE;
+    }
+
+    /* 页面容器 */
+    .page-container {
+      padding: 16px;
+      padding-bottom: 40px;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .page-container.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 首页：墨绿色主卡片 */
+    .hero-card {
+      background: linear-gradient(145deg, #144E44, #0E3A32);
+      border-radius: 16px;
+      padding: 24px 20px;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(14, 58, 50, 0.15);
+      margin-bottom: 20px;
+    }
+    .hero-title { font-size: 24px; font-weight: bold; margin-bottom: 12px; line-height: 1.3; }
+    .hero-desc { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 24px; line-height: 1.6; }
+    
+    /* 数据统计区（修改为居中单数字） */
+    .stats-row { display: flex; justify-content: center; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
+    .stat-item { display: flex; align-items: baseline; gap: 8px; }
+    .stat-num { font-size: 28px; font-weight: bold; }
+    .stat-label { font-size: 13px; color: rgba(255,255,255,0.7); }
+
+    /* 通用白色卡片 */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+    .card-desc { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+    /* 大按钮 */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      background: #0E5346;
+      color: #fff;
+      text-align: center;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:active { opacity: 0.8; }
+    .btn-secondary {
+      background: #fff;
+      color: #0E5346;
+      border: 1px solid #0E5346;
+      margin-top: 16px;
+    }
+
+    /* 表单元素 */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #111; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
+
+    /* 结果页二维码 */
+    .result-qr { width: 160px; height: 160px; display: block; margin: 16px auto; border: 1px solid #eee; border-radius: 8px; }
+    
+    /* 纯列表样式 */
+    .list-item { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 15px; color: #333; }
+    .list-item:last-child { border-bottom: none; }
+
+    /* 隐藏类 */
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <div class="nav-bar">乙肝新药项目匹配</div>
+
+  <!-- 视图 1：首页 -->
+  <div id="view-home" class="page-container active">
+    <div class="hero-card">
+      <div class="hero-title">乙肝新药项目匹配</div>
+      <div class="hero-desc">逐条对照本中心正在开展的乙肝新药临床试验的官方入选与排除标准，比对您的病毒学、肝功能与病史信息。</div>
+      
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-active-count">--</div>
+          <div class="stat-label">本中心在研项目</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">开始条件匹配</div>
+      <div class="card-desc">填写年龄、病毒学指标、用药史与基础疾病，约 3 分钟。全部信息只保存在本机。</div>
+      <button class="btn-primary" onclick="switchView('view-form')">填写我的指标</button>
+      <button class="btn-primary btn-secondary" onclick="showProjectList()">查看项目列表</button>
+    </div>
+  </div>
+
+  <!-- 视图 2：表单页 -->
+  <div id="view-form" class="page-container">
+    <div class="card">
+      <div class="card-title">填写检验报告</div>
+      <div class="card-desc">请根据您近期的化验单如实填写。带 <span style="color:red">*</span> 为必填项。</div>
+      
+      <div class="form-group">
+        <label>年龄 (岁) <span style="color:red">*</span></label>
+        <input type="number" id="age" placeholder="例如：35">
+      </div>
+      
+      <div class="form-group">
+        <label>乙肝e抗原 (HBeAg) <span style="color:red">*</span></label>
+        <select id="hbeag">
+          <option value="">请选择</option>
+          <option value="阳性">阳性</option>
+          <option value="阴性">阴性</option>
+          <option value="不清楚">不清楚</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>乙肝表面抗原定量 HBsAg (IU/mL) <span style="color:red">*</span></label>
+        <input type="number" id="hbsag" placeholder="例如：1200">
+      </div>
+
+      <div class="form-group">
+        <label>HBV DNA 状态 <span style="color:red">*</span></label>
+        <select id="hbv_dna_status">
+          <option value="">请选择</option>
+          <option value="检测到">检测到</option>
+          <option value="检测不到">检测不到</option>
+          <option value="不清楚">不清楚</option>
+        </select>
+      </div>
+
+      <div class="form-group hide" id="dna_value_group">
+        <label>HBV DNA 定量 (IU/mL) <span style="color:red">*</span></label>
+        <input type="number" id="hbv_dna_value" placeholder="例如：50000">
+      </div>
+
+      <div class="form-group">
+        <label>是否存在肝硬化 <span style="color:red">*</span></label>
+        <select id="cirrhosis">
+          <option value="">请选择</option>
+          <option value="是">是</option>
+          <option value="否">否</option>
+          <option value="不清楚">不清楚</option>
+        </select>
+      </div>
+
+      <button class="btn-primary" onclick="doMatch()">开始匹配项目</button>
+      <button class="btn-primary btn-secondary" onclick="switchView('view-home')">返回首页</button>
+    </div>
+  </div>
+
+  <!-- 视图 3：结果页 -->
+  <div id="view-result" class="page-container">
+    <div class="card">
+      <div class="card-title" style="color: #0E5346;">匹配结果</div>
+      <div class="card-desc">基于您填写的指标，以下项目初步符合条件。最终是否符合以研究医生评估为准。</div>
+      <div id="result-list"></div>
+      <button class="btn-primary btn-secondary" onclick="switchView('view-home')" style="margin-top: 24px;">重新匹配</button>
+    </div>
+  </div>
+
+  <!-- 视图 4：所有项目列表 -->
+  <div id="view-list" class="page-container">
+    <div class="card">
+      <div class="card-title">当前在研项目列表</div>
+      <div class="card-desc">以下是目前正在招募中的临床试验项目。如果您想看看自己是否符合，请返回首页填写指标进行匹配。</div>
+      <div id="all-projects-list" style="margin-bottom: 20px;"></div>
+      <button class="btn-primary btn-secondary" onclick="switchView('view-home')">返回首页</button>
+    </div>
+  </div>
+
+  <script>
+    let allProjects = [];
+
+    // 页面加载时获取项目数据
+    fetch('projects.json?v=' + Date.now())
+      .then(res => res.json())
+      .then(data => {
+        allProjects = Array.isArray(data) ? data : (data.projects || []);
+        // 动态计算首页“在研”数量
+        const activeCount = allProjects.filter(p => p.status === 'active').length;
+        document.getElementById('stat-active-count').innerText = activeCount;
+      })
+      .catch(err => {
+        console.error('数据加载失败', err);
+        document.getElementById('stat-active-count').innerText = '0';
+      });
+
+    // 视图切换逻辑
+    function switchView(viewId) {
+      document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      window.scrollTo(0, 0); 
+    }
+
+    // 展示项目列表视图
+    function showProjectList() {
+      const activeProjects = allProjects.filter(p => p.status === 'active');
+      const listContainer = document.getElementById('all-projects-list');
+      
+      if (activeProjects.length === 0) {
+        listContainer.innerHTML = '<p style="color:#666; text-align:center;">当前暂无在研项目</p>';
+      } else {
+        listContainer.innerHTML = activeProjects.map(p => `
+          <div class="list-item">
+            <span style="display:inline-block; width:8px; height:8px; background:#0E5346; border-radius:50%; margin-right:8px;"></span>
+            ${p.name}
+          </div>
+        `).join('');
+      }
+      switchView('view-list');
+    }
+
+    // 表单联动：DNA状态
+    document.getElementById('hbv_dna_status').addEventListener('change', function(e) {
+      const dnaGroup = document.getElementById('dna_value_group');
+      if (e.target.value === '检测到') {
+        dnaGroup.classList.remove('hide');
+      } else {
+        dnaGroup.classList.add('hide');
+        document.getElementById('hbv_dna_value').value = '';
+      }
+    });
+
+    // 执行匹配逻辑
+    function doMatch() {
+      const patientData = {
+        age: parseFloat(document.getElementById('age').value),
+        hbeag: document.getElementById('hbeag').value,
+        hbsag: parseFloat(document.getElementById('hbsag').value),
+        hbv_dna_status: document.getElementById('hbv_dna_status').value,
+        hbv_dna_value: parseFloat(document.getElementById('hbv_dna_value').value) || 0,
+        cirrhosis: document.getElementById('cirrhosis').value
+      };
+
+      if (!patientData.age || !patientData.hbeag || !patientData.hbsag || !patientData.hbv_dna_status || !patientData.cirrhosis) {
+        alert("请将带 * 号的必填项填写完整");
+        return;
+      }
+
+      const activeProjects = allProjects.filter(p => p.status === 'active');
+      let matchedHtml = '';
+      let matchCount = 0;
+
+      activeProjects.forEach(project => {
+        let isMatch = true;
+        let isUnknown = false;
+
+        (project.rules || []).forEach(rule => {
+          const val = patientData[rule.field];
+          if (val === '不清楚') { isUnknown = true; return; }
+
+          if (rule.op === 'eq' && String(val) !== String(rule.value)) isMatch = false;
+          if (rule.op === 'lte' && val > rule.value) isMatch = false;
+          if (rule.op === 'gte' && val < rule.value) isMatch = false;
+          if (rule.op === 'between' && (val < rule.value || val > rule.value2)) isMatch = false;
+        });
+
+        if (isMatch && !isUnknown) {
+          matchCount++;
+          matchedHtml += `
+            <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
+              <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 16px;">${project.name}</h3>
+              <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请长按识别或扫码添加研究医生微信：</p>
+              <img src="${project.qrCodeUrl}" class="result-qr" alt="二维码">
+              <p style="font-size: 12px; color: #999;">添加后由研究团队与您沟通</p>
+            </div>
+          `;
+        }
+      });
+
+      const resultList = document.getElementById('result-list');
+      if (matchCount > 0) {
+        resultList.innerHTML = matchedHtml;
+      } else {
+        resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
+      }
+
+      switchView('view-result');
+    }
+  </script>
+</body>
+</html>

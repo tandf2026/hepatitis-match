@@ -1,0 +1,10 @@
+{
+  "projects": [
+    {
+      "id": "p001",
+      "name": "示例项目（上线后请替换为真实名称）",
+      "status": "active",
+      "qrCodeUrl": ""
+    }
+  ]
+}
