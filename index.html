@@ -256,54 +256,21 @@
           let isMatch = true;
           let isUnknown = false;
 
-          // 核心容错逻辑：获取文本和 JSON
-          let fullText = "";
           let incRules = [], excRules = [];
-          
-          if (project.rules) {
-            let raw = String(project.rules).trim();
-            
-            // 如果后台塞了JSON，尝试把JSON和文字剥离
-            try {
-               let parsed = JSON.parse(raw);
-               if (parsed.include || parsed.exclude) {
-                   incRules = parsed.include || [];
-                   excRules = parsed.exclude || [];
-               } else if (Array.isArray(parsed)) {
-                   incRules = parsed;
-               }
-               // 如果其中夹杂了文字字段
-               if (parsed.criteriaText) fullText = parsed.criteriaText;
-            } catch(e) {
-               // 如果 JSON.parse 失败，说明用户在框里直接写了纯文字，或者文字和 JSON 混在了一起。
-               // 尝试用正则提取出方括号或花括号包起来的部分当 JSON，剩下的当文字
-               let jsonMatch = raw.match(/\[\s*\{[\s\S]*\}\s*\]/);
-               let objMatch = raw.match(/\{\s*"include"[\s\S]*\}\s*/);
-               let jsonPart = jsonMatch ? jsonMatch[0] : (objMatch ? objMatch[0] : null);
-               
-               if (jsonPart) {
-                 try {
-                   let parsed = JSON.parse(jsonPart);
-                   if (parsed.include || parsed.exclude) {
-                       incRules = parsed.include || [];
-                       excRules = parsed.exclude || [];
-                   } else if (Array.isArray(parsed)) {
-                       incRules = parsed;
-                   }
-                   // 把剥离掉 JSON 后剩下的文字作为说明
-                   fullText = raw.replace(jsonPart, '').trim();
-                 } catch(err) {
-                   fullText = raw; // 确实解析不出 JSON，全当文字
-                 }
-               } else {
-                 fullText = raw; // 没有 JSON 结构，全当文字
-               }
+          try {
+            if (project.rules) {
+              let parsed = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
+              if (parsed.include || parsed.exclude) {
+                  incRules = parsed.include || [];
+                  excRules = parsed.exclude || [];
+              } else if (Array.isArray(parsed)) {
+                  incRules = parsed;
+              }
             }
-          }
+          } catch (e) { console.error("规则解析失败:", project.name); }
 
           let matchedIncDesc = [], matchedExcDesc = [];
 
-          // 匹配算法
           incRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
@@ -338,22 +305,19 @@
             if (!hit && rule.desc) matchedExcDesc.push(rule.desc); 
           });
 
-          // 如果完全是文字没有JSON，默认算匹配，仅仅展示文字
-          if (incRules.length === 0 && excRules.length === 0 && fullText) {
-              isMatch = true;
-          }
-
           if (isMatch && !isUnknown) {
             matchCount++;
             let wechatId = project.qrCodeUrl || "未填写微信号";
             let detailHtml = '';
 
-            if (fullText) {
+            // 如果后台有独立的 fullCriteria 字段，直接展示它
+            if (project.fullCriteria && project.fullCriteria.trim() !== "") {
                detailHtml = `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
                 <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
-                <div class="criteria-box">${fullText}</div>
+                <div class="criteria-box">${project.fullCriteria}</div>
               </details>`;
-            } else if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
+            } 
+            else if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
               detailHtml += `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
                 <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
                 <div class="criteria-box">`;
