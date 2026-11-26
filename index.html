@@ -119,7 +119,6 @@
   <script>
     // ====== 1. 全局变量与安全加载 ======
     let allProjects = [];
-    let matchedProjects = []; // 用于在结果页显示
 
     fetch('projects.json?v=' + Date.now())
       .then(res => res.json())
@@ -154,7 +153,7 @@
       if (el) el.addEventListener(event, fn);
     };
 
-        bindEvent('hbv_dna_status', 'change', function(e) {
+    bindEvent('hbv_dna_status', 'change', function(e) {
       const group = document.getElementById('dna_value_group');
       if(group) {
         if (e.target.value === '检测到') group.classList.remove('hide');
@@ -189,6 +188,7 @@
         else doseGroup.classList.add('hide');
       }
     });
+
     // ====== 5. 匹配逻辑 ======
     function doMatch() {
       try {
@@ -240,7 +240,21 @@
           let isMatch = true;
           let isUnknown = false;
 
-          (project.rules || []).forEach(rule => {
+          // 【修复核心】：自动识别并解析规则
+          let rulesList = [];
+          try {
+            if (typeof project.rules === 'string') {
+              // 如果是字符串，尝试将其转为 JSON 数组
+              rulesList = JSON.parse(project.rules);
+            } else if (Array.isArray(project.rules)) {
+              rulesList = project.rules;
+            }
+          } catch (e) {
+            console.error("项目规则格式有误，无法解析:", project.name);
+            rulesList = []; // 解析失败就当没有规则
+          }
+
+          rulesList.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
             if (val === undefined || val === null) return; 
