@@ -31,7 +31,11 @@ content:
         label: 研究者微信号
         type: string
         required: true
-      - name: rules
-        label: 入排规则
+      - name: includeRules
+        label: 入选标准 (必须是数组)
+        type: text
+        required: true
+      - name: excludeRules
+        label: 排除标准 (必须是数组)
         type: text
         required: false
