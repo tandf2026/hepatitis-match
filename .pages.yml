@@ -27,9 +27,9 @@ content:
             - ended
         default: active
         required: true
-      - name: qrCodeUrl
-        label: 研究者二维码
-        type: image
+     - name: qrCodeUrl
+        label: 研究者微信号
+        type: string
         required: true
       - name: rules
         label: 入排规则（JSON格式）
