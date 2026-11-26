@@ -29,12 +29,11 @@
     .form-group input:not([type="checkbox"]), .form-group select { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
     .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
     
-    /* 复选框样式 */
     .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 8px; }
     .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333; cursor: pointer; }
     .checkbox-label input { width: 16px; height: 16px; accent-color: #0E5346; }
 
-    .criteria-box { background: #f9f9f9; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; font-size: 13px; }
+    .criteria-box { background: #f9f9f9; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; font-size: 13px; line-height: 1.8; color: #444; white-space: pre-wrap; }
     .criteria-title { font-weight: bold; margin-bottom: 6px; color: #333; }
     .criteria-list { padding-left: 18px; color: #666; margin-bottom: 12px; }
     .hide { display: none !important; }
@@ -46,16 +45,12 @@
 
   <div class="nav-bar">乙肝新药项目匹配</div>
 
-  <!-- 首页 -->
   <div id="view-home" class="page-container active">
     <div class="hero-card">
       <div class="hero-title">乙肝新药项目匹配</div>
       <div class="hero-desc">逐条对照本中心正在开展的乙肝新药临床试验的官方入选与排除标准，比对您的病毒学、肝功能与病史信息。</div>
       <div class="stats-row">
-        <div class="stat-item">
-          <div class="stat-num" id="stat-active-count">0</div>
-          <div class="stat-label">本中心在研项目</div>
-        </div>
+        <div class="stat-item"><div class="stat-num" id="stat-active-count">0</div><div class="stat-label">本中心在研项目</div></div>
       </div>
     </div>
     <div class="card">
@@ -66,7 +61,6 @@
     </div>
   </div>
 
-  <!-- 表单页 -->
   <div id="view-form" class="page-container">
     <div class="card">
       <div class="card-title">填写检验报告及病史</div>
@@ -95,7 +89,6 @@
       <div class="form-group"><label>是否存在肝硬化 <span style="color:red">*</span></label><select id="cirrhosis"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
       <div class="form-group"><label>是否存在肝癌 <span style="color:red">*</span></label><select id="hcc"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
       
-      <!-- 合并疾病多选 -->
       <div class="form-group">
         <label>既往是否有其他合并疾病？（可多选）</label>
         <div class="checkbox-group" id="comorbidity-group">
@@ -118,7 +111,6 @@
     </div>
   </div>
 
-  <!-- 结果页 -->
   <div id="view-result" class="page-container">
     <div class="card">
       <div class="card-title" style="color: #0E5346;">匹配结果</div>
@@ -128,7 +120,6 @@
     </div>
   </div>
 
-  <!-- 项目列表页 -->
   <div id="view-list" class="page-container">
     <div class="card">
       <div class="card-title">当前在研项目列表</div>
@@ -188,7 +179,6 @@
       document.getElementById('prior_dose_group').style.display = isYes ? 'block' : 'none';
     });
 
-    // 合并疾病多选联动：选“无”清空其他，选其他取消“无”
     document.querySelectorAll('input[name="comorbidity"]').forEach(cb => {
       cb.addEventListener('change', function() {
         const noneCb = document.getElementById('comorbidity-none');
@@ -218,9 +208,7 @@
         const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
         const getNum = (id) => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
 
-        // 收集多选疾病
         const comorbidities = Array.from(document.querySelectorAll('input[name="comorbidity"]:checked')).map(cb => cb.value);
-        // 如果全都没选，默认算无
         if (comorbidities.length === 0) comorbidities.push('无');
 
         const p = {
@@ -239,7 +227,7 @@
           ifn_status: getVal('ifn_status'),
           cirrhosis: getVal('cirrhosis'),
           hcc: getVal('hcc'),
-          comorbidities: comorbidities, // 这是一个数组
+          comorbidities: comorbidities,
           prior_trial: getVal('prior_trial'),
           prior_trial_last_dose: getNum('prior_trial_last_dose')
         };
@@ -270,14 +258,19 @@
 
           let incRules = [], excRules = [];
           try {
-            if (project.rules) incRules = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
-            if (project.includeRules) incRules = typeof project.includeRules === 'string' ? JSON.parse(project.includeRules) : project.includeRules;
-            if (project.excludeRules) excRules = typeof project.excludeRules === 'string' ? JSON.parse(project.excludeRules) : project.excludeRules;
+            if (project.rules) {
+              let parsed = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
+              if (parsed.include || parsed.exclude) {
+                  incRules = parsed.include || [];
+                  excRules = parsed.exclude || [];
+              } else if (Array.isArray(parsed)) {
+                  incRules = parsed;
+              }
+            }
           } catch (e) { console.error("规则解析失败:", project.name); }
 
           let matchedIncDesc = [], matchedExcDesc = [];
 
-          // 1. 检查入选标准
           incRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
@@ -293,7 +286,6 @@
             if (pass && rule.desc) matchedIncDesc.push(rule.desc);
           });
 
-          // 2. 检查排除标准
           excRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
@@ -301,7 +293,6 @@
 
             let hit = false;
             if (rule.field === 'comorbidities') {
-              // 对于多选数组，如果患者勾选的疾病包含了规则中的疾病，视为命中排除
               if (Array.isArray(val) && val.includes(rule.value)) hit = true;
             } else {
               if (rule.op === 'eq' && String(val) === String(rule.value)) hit = true;
@@ -317,9 +308,17 @@
           if (isMatch && !isUnknown) {
             matchCount++;
             let wechatId = project.qrCodeUrl || "未填写微信号";
-
             let detailHtml = '';
-            if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
+
+            // 如果后台粘贴了完整的文字说明，优先展示文字
+            if (project.fullCriteria) {
+               detailHtml = `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
+                <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
+                <div class="criteria-box">${project.fullCriteria}</div>
+              </details>`;
+            } 
+            // 否则展示程序自动生成的简短列表
+            else if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
               detailHtml += `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
                 <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
                 <div class="criteria-box">`;
