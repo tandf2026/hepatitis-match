@@ -45,7 +45,7 @@
       <div class="hero-desc">逐条对照本中心正在开展的乙肝新药临床试验的官方入选与排除标准，比对您的病毒学、肝功能与病史信息。</div>
       <div class="stats-row">
         <div class="stat-item">
-          <div class="stat-num" id="stat-active-count">--</div>
+          <div class="stat-num" id="stat-active-count">0</div>
           <div class="stat-label">本中心在研项目</div>
         </div>
       </div>
@@ -117,7 +117,9 @@
   </div>
 
   <script>
-  let allProjects = [];
+    // ====== 1. 全局变量与安全加载 ======
+    let allProjects = [];
+    let matchedProjects = []; // 用于在结果页显示
 
     fetch('projects.json?v=' + Date.now())
       .then(res => res.json())
@@ -125,17 +127,16 @@
         allProjects = Array.isArray(data) ? data : (data.projects || []);
         document.getElementById('stat-active-count').innerText = allProjects.filter(p => p.status === 'active').length;
       })
-      .catch(err => {
-        console.error(err);
-        alert("加载项目数据失败，请检查后台配置！");
-      });
+      .catch(err => console.error("项目数据加载失败：", err));
 
+    // ====== 2. 页面切换 ======
     function switchView(viewId) {
       document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
       window.scrollTo(0, 0); 
     }
 
+    // ====== 3. 列表展示 ======
     function showProjectList() {
       const activeProjects = allProjects.filter(p => p.status === 'active');
       const listContainer = document.getElementById('all-projects-list');
@@ -147,72 +148,75 @@
       switchView('view-list');
     }
 
-    // 动态表单联动逻辑
-    document.getElementById('hbv_dna_status').addEventListener('change', function(e) {
-      document.getElementById('dna_value_group').style.display = (e.target.value === '检测到') ? 'block' : 'none';
-      if (e.target.value !== '检测到') document.getElementById('hbv_dna_value').value = '';
+    // ====== 4. 安全表单联动 ======
+    const bindEvent = (id, event, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(event, fn);
+    };
+
+    bindEvent('hbv_dna_status', 'change', function(e) {
+      const group = document.getElementById('dna_value_group');
+      if(group) group.style.display = (e.target.value === '检测到') ? 'block' : 'none';
     });
     
-    document.getElementById('avt_status').addEventListener('change', function(e) {
+    bindEvent('avt_status', 'change', function(e) {
       const isNever = (e.target.value === '从未抗病毒' || e.target.value === '');
-      document.getElementById('avt_duration_group').style.display = isNever ? 'none' : 'block';
-      document.getElementById('avt_current_group').style.display = isNever ? 'none' : 'block';
-      if (isNever) {
-        document.getElementById('avt_total_duration').value = '';
-        document.getElementById('avt_current_duration').value = '';
-      }
+      const durGroup = document.getElementById('avt_duration_group');
+      const curGroup = document.getElementById('avt_current_group');
+      if(durGroup) durGroup.style.display = isNever ? 'none' : 'block';
+      if(curGroup) curGroup.style.display = isNever ? 'none' : 'block';
     });
 
-    document.getElementById('prior_trial').addEventListener('change', function(e) {
+    bindEvent('prior_trial', 'change', function(e) {
       const isYes = (e.target.value === '是');
-      document.getElementById('prior_drug_group').style.display = isYes ? 'block' : 'none';
-      document.getElementById('prior_dose_group').style.display = isYes ? 'block' : 'none';
-      if (!isYes) {
-        document.getElementById('prior_trial_drug').value = '';
-        document.getElementById('prior_trial_last_dose').value = '';
-      }
+      const drugGroup = document.getElementById('prior_drug_group');
+      const doseGroup = document.getElementById('prior_dose_group');
+      if(drugGroup) drugGroup.style.display = isYes ? 'block' : 'none';
+      if(doseGroup) doseGroup.style.display = isYes ? 'block' : 'none';
     });
 
-    // 执行匹配
+    // ====== 5. 匹配逻辑 ======
     function doMatch() {
       try {
+        const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+        const getNum = (id) => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
+
         const p = {
-          age: parseFloat(document.getElementById('age').value) || 0,
-          sex: document.getElementById('sex').value,
-          height: parseFloat(document.getElementById('height').value) || 0,
-          weight: parseFloat(document.getElementById('weight').value) || 0,
-          hbeag: document.getElementById('hbeag').value,
-          hbsag: parseFloat(document.getElementById('hbsag').value) || 0,
-          hbv_dna_status: document.getElementById('hbv_dna_status').value,
-          hbv_dna_value: parseFloat(document.getElementById('hbv_dna_value').value) || 0,
-          liver_stiffness: parseFloat(document.getElementById('liver_stiffness').value) || 0,
-          avt_status: document.getElementById('avt_status').value,
-          avt_total_duration: document.getElementById('avt_total_duration').value,
-          avt_current_duration: parseFloat(document.getElementById('avt_current_duration').value) || 0,
-          ifn_status: document.getElementById('ifn_status').value,
-          cirrhosis: document.getElementById('cirrhosis').value,
-          hcc: document.getElementById('hcc').value,
-          prior_trial: document.getElementById('prior_trial').value,
-          prior_trial_last_dose: parseFloat(document.getElementById('prior_trial_last_dose').value) || 0
+          age: getNum('age'),
+          sex: getVal('sex'),
+          height: getNum('height'),
+          weight: getNum('weight'),
+          hbeag: getVal('hbeag'),
+          hbsag: getNum('hbsag'),
+          hbv_dna_status: getVal('hbv_dna_status'),
+          hbv_dna_value: getNum('hbv_dna_value'),
+          liver_stiffness: getNum('liver_stiffness'),
+          avt_status: getVal('avt_status'),
+          avt_total_duration: getVal('avt_total_duration'),
+          avt_current_duration: getNum('avt_current_duration'),
+          ifn_status: getVal('ifn_status'),
+          cirrhosis: getVal('cirrhosis'),
+          hcc: getVal('hcc'),
+          prior_trial: getVal('prior_trial'),
+          prior_trial_last_dose: getNum('prior_trial_last_dose')
         };
 
-        // 自动计算 BMI
         if (p.height > 0 && p.weight > 0) {
           p.bmi = parseFloat((p.weight / ((p.height / 100) ** 2)).toFixed(1));
         }
 
-        // 必填项严格校验
-        if (p.age === 0) { alert("【年龄】未填写"); return; }
-        if (p.sex === "") { alert("【性别】未选择"); return; }
-        if (p.hbeag === "") { alert("【乙肝e抗原】未选择"); return; }
-        if (document.getElementById('hbsag').value === "") { alert("【乙肝表面抗原定量】未填写"); return; }
-        if (p.hbv_dna_status === "") { alert("【HBV DNA 状态】未选择"); return; }
-        if (p.hbv_dna_status === "检测到" && document.getElementById('hbv_dna_value').value === "") { alert("【HBV DNA 定量】未填写"); return; }
-        if (p.avt_status === "") { alert("【抗病毒治疗情况】未选择"); return; }
-        if (p.ifn_status === "") { alert("【干扰素使用情况】未选择"); return; }
-        if (p.cirrhosis === "") { alert("【是否存在肝硬化】未选择"); return; }
-        if (p.hcc === "") { alert("【是否存在肝癌】未选择"); return; }
-        if (p.prior_trial === "") { alert("【既往是否参加过临床研究】未选择"); return; }
+        // 校验必填项
+        if (p.age === 0) return alert("请填写【年龄】");
+        if (p.sex === "") return alert("请选择【性别】");
+        if (p.hbeag === "") return alert("请选择【乙肝e抗原】");
+        if (getVal('hbsag') === "") return alert("请填写【乙肝表面抗原定量】");
+        if (p.hbv_dna_status === "") return alert("请选择【HBV DNA 状态】");
+        if (p.hbv_dna_status === "检测到" && getVal('hbv_dna_value') === "") return alert("请填写【HBV DNA 定量】");
+        if (p.avt_status === "") return alert("请选择【抗病毒治疗情况】");
+        if (p.ifn_status === "") return alert("请选择【干扰素使用情况】");
+        if (p.cirrhosis === "") return alert("请选择【是否存在肝硬化】");
+        if (p.hcc === "") return alert("请选择【是否存在肝癌】");
+        if (p.prior_trial === "") return alert("请选择【既往是否参加过临床研究】");
 
         const activeProjects = allProjects.filter(x => x.status === 'active');
         let matchedHtml = '';
@@ -253,9 +257,10 @@
           resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
         }
         switchView('view-result');
-      } catch (error) {
-        // 如果程序崩溃，直接把报错原因弹窗显示出来
-        alert("系统运行出错，请截图发给管理员：\n" + error.message);
-        console.error(error);
+      } catch (err) {
+        alert("系统错误：" + err.message);
       }
     }
+  </script>
+</body>
+</html>
