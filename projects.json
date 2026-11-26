@@ -5,5 +5,12 @@
     "status": "active",
     "qrCodeUrl": "/images/1911ccbdbf70e6759f206dc7c912a3d1.jpg",
     "rules": "[\n  {\n    \"field\": \"age\",\n    \"op\": \"between\",\n    \"value\": 18,\n    \"value2\": 70\n  },\n  {\n    \"field\": \"bmi\",\n    \"op\": \"between\",\n    \"value\": 19,\n    \"value2\": 30\n  },\n  {\n    \"field\": \"avt_status\",\n    \"op\": \"eq\",\n    \"value\": \"从未抗病毒\"\n  },\n  {\n    \"field\": \"hbsag\",\n    \"op\": \"between\",\n    \"value\": 10,\n    \"value2\": 3000\n  },\n  {\n    \"field\": \"hbeag\",\n    \"op\": \"eq\",\n    \"value\": \"阴性\"\n  },\n  {\n    \"field\": \"hbv_dna_value\",\n    \"op\": \"between\",\n    \"value\": 20,\n    \"value2\": 20000\n  },\n  {\n    \"field\": \"hbv_dna_status\",\n    \"op\": \"eq\",\n    \"value\": \"检测到\"\n  },\n  {\n    \"field\": \"liver_stiffness\",\n    \"op\": \"lte\",\n    \"value\": 9.7\n  }\n]"
+  },
+  {
+    "id": "002",
+    "name": "测试项目",
+    "status": "active",
+    "qrCodeUrl": "/images/1-GCP伦理汇报.png",
+    "rules": "[\n  {\n    \"field\": \"age\",\n    \"op\": \"between\",\n    \"value\": 18,\n    \"value2\": 70\n  },\n  {\n    \"field\": \"hbv_dna_status\",\n    \"op\": \"eq\",\n    \"value\": \"检测到\"\n  },\n  {\n    \"field\": \"liver_stiffness\",\n    \"op\": \"lte\",\n    \"value\": 9.7\n  }\n]"
   }
 ]
