@@ -26,14 +26,17 @@
     .btn-secondary { background: #fff; color: #0E5346; border: 1px solid #0E5346; margin-top: 16px; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #111; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0E5346; outline: none; background: #fff; }
+    .form-group input:not([type="checkbox"]), .form-group select { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
+    .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
     
-    /* 结果页详细标准样式 */
+    /* 复选框样式 */
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 8px; }
+    .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333; cursor: pointer; }
+    .checkbox-label input { width: 16px; height: 16px; accent-color: #0E5346; }
+
     .criteria-box { background: #f9f9f9; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; font-size: 13px; }
     .criteria-title { font-weight: bold; margin-bottom: 6px; color: #333; }
     .criteria-list { padding-left: 18px; color: #666; margin-bottom: 12px; }
-    
     .hide { display: none !important; }
     .form-section-title { font-size: 15px; color: #0E5346; font-weight: bold; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
     .form-section-title:first-child { margin-top: 0; }
@@ -86,17 +89,24 @@
       <div class="form-group"><label>抗病毒治疗情况 <span style="color:red">*</span></label><select id="avt_status"><option value="">请选择</option><option value="从未抗病毒">从未抗病毒</option><option value="服用单药">服用单药药物</option><option value="服用两种药物">服用两种药物</option></select></div>
       <div class="form-group hide" id="avt_duration_group"><label>总抗病毒时长 <span style="color:red">*</span></label><select id="avt_total_duration"><option value="">请选择</option><option value="<3月">《3月</option><option value="3-6月">3-6月</option><option value=">6月">》6月</option></select></div>
       <div class="form-group hide" id="avt_current_group"><label>当前方案时长 (月)</label><input type="number" id="avt_current_duration" placeholder="例如：12"></div>
-      
       <div class="form-group"><label>干扰素使用情况 <span style="color:red">*</span></label><select id="ifn_status"><option value="">请选择</option><option value="从未使用">从未使用</option><option value="正在使用">正在使用</option><option value="已停用6月">已停用6月</option><option value="已停用1年">已停用1年</option></select></div>
 
       <div class="form-section-title">病史与既往研究</div>
       <div class="form-group"><label>是否存在肝硬化 <span style="color:red">*</span></label><select id="cirrhosis"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
       <div class="form-group"><label>是否存在肝癌 <span style="color:red">*</span></label><select id="hcc"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
       
-      <!-- 新增：既往合并疾病 -->
+      <!-- 合并疾病多选 -->
       <div class="form-group">
-        <label>既往是否有其他合并疾病？</label>
-        <textarea id="comorbidities" rows="2" placeholder="如：高血压、糖尿病、冠心病等，若没有请填“无”"></textarea>
+        <label>既往是否有其他合并疾病？（可多选）</label>
+        <div class="checkbox-group" id="comorbidity-group">
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="高血压"> 高血压</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="糖尿病"> 糖尿病</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="冠心病"> 冠心病</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="肾脏疾病"> 肾脏疾病</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="自身免疫病"> 自身免疫病</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="精神类疾病"> 精神类疾病</label>
+          <label class="checkbox-label"><input type="checkbox" name="comorbidity" value="无" id="comorbidity-none"> 无</label>
+        </div>
       </div>
 
       <div class="form-group"><label>既往是否参加过临床研究 <span style="color:red">*</span></label><select id="prior_trial"><option value="">请选择</option><option value="是">是</option><option value="否">否</option></select></div>
@@ -112,7 +122,7 @@
   <div id="view-result" class="page-container">
     <div class="card">
       <div class="card-title" style="color: #0E5346;">匹配结果</div>
-      <div class="card-desc">基于您填写的指标，以下项目初步符合条件。如需了解项目详细情况，可关注“上海市东方医院感染科”微信公众号，最终是否符合以研究医生评估为准。</div>
+      <div class="card-desc">基于您填写的指标，以下项目初步符合条件。最终是否符合以研究医生评估为准。</div>
       <div id="result-list"></div>
       <button class="btn-primary btn-secondary" onclick="switchView('view-home')" style="margin-top: 24px;">重新匹配</button>
     </div>
@@ -178,7 +188,20 @@
       document.getElementById('prior_dose_group').style.display = isYes ? 'block' : 'none';
     });
 
-    // 复制微信号功能
+    // 合并疾病多选联动：选“无”清空其他，选其他取消“无”
+    document.querySelectorAll('input[name="comorbidity"]').forEach(cb => {
+      cb.addEventListener('change', function() {
+        const noneCb = document.getElementById('comorbidity-none');
+        if (this.value === '无' && this.checked) {
+          document.querySelectorAll('input[name="comorbidity"]').forEach(other => {
+            if (other.value !== '无') other.checked = false;
+          });
+        } else if (this.value !== '无' && this.checked) {
+          noneCb.checked = false;
+        }
+      });
+    });
+
     function copyWechat(text) {
       if (text === "未填写微信号") return;
       var input = document.createElement("textarea");
@@ -194,6 +217,11 @@
       try {
         const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
         const getNum = (id) => { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; };
+
+        // 收集多选疾病
+        const comorbidities = Array.from(document.querySelectorAll('input[name="comorbidity"]:checked')).map(cb => cb.value);
+        // 如果全都没选，默认算无
+        if (comorbidities.length === 0) comorbidities.push('无');
 
         const p = {
           age: getNum('age'),
@@ -211,7 +239,7 @@
           ifn_status: getVal('ifn_status'),
           cirrhosis: getVal('cirrhosis'),
           hcc: getVal('hcc'),
-          comorbidities: getVal('comorbidities'),
+          comorbidities: comorbidities, // 这是一个数组
           prior_trial: getVal('prior_trial'),
           prior_trial_last_dose: getNum('prior_trial_last_dose')
         };
@@ -220,7 +248,6 @@
           p.bmi = parseFloat((p.weight / ((p.height / 100) ** 2)).toFixed(1));
         }
 
-        // 校验必填项
         if (p.age === 0) return alert("请填写【年龄】");
         if (p.sex === "") return alert("请选择【性别】");
         if (p.hbeag === "") return alert("请选择【乙肝e抗原】");
@@ -241,24 +268,16 @@
           let isMatch = true;
           let isUnknown = false;
 
-          // 解析规则
           let incRules = [], excRules = [];
           try {
-            // 兼容旧格式（只有 rules）
-            if (project.rules) {
-              incRules = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
-            }
-            if (project.includeRules) {
-              incRules = typeof project.includeRules === 'string' ? JSON.parse(project.includeRules) : project.includeRules;
-            }
-            if (project.excludeRules) {
-              excRules = typeof project.excludeRules === 'string' ? JSON.parse(project.excludeRules) : project.excludeRules;
-            }
+            if (project.rules) incRules = typeof project.rules === 'string' ? JSON.parse(project.rules) : project.rules;
+            if (project.includeRules) incRules = typeof project.includeRules === 'string' ? JSON.parse(project.includeRules) : project.includeRules;
+            if (project.excludeRules) excRules = typeof project.excludeRules === 'string' ? JSON.parse(project.excludeRules) : project.excludeRules;
           } catch (e) { console.error("规则解析失败:", project.name); }
 
           let matchedIncDesc = [], matchedExcDesc = [];
 
-          // 1. 检查入选标准 (必须全部满足)
+          // 1. 检查入选标准
           incRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
@@ -274,27 +293,31 @@
             if (pass && rule.desc) matchedIncDesc.push(rule.desc);
           });
 
-          // 2. 检查排除标准 (只要命中一条即被排除)
+          // 2. 检查排除标准
           excRules.forEach(rule => {
             const val = p[rule.field];
             if (val === '不清楚') { isUnknown = true; return; }
             if (val === undefined || val === null) return;
 
             let hit = false;
-            if (rule.op === 'eq' && String(val) === String(rule.value)) hit = true;
-            if (rule.op === 'lte' && val <= rule.value) hit = true;
-            if (rule.op === 'gte' && val >= rule.value) hit = true;
-            if (rule.op === 'between' && (val >= rule.value && val <= rule.value2)) hit = true;
+            if (rule.field === 'comorbidities') {
+              // 对于多选数组，如果患者勾选的疾病包含了规则中的疾病，视为命中排除
+              if (Array.isArray(val) && val.includes(rule.value)) hit = true;
+            } else {
+              if (rule.op === 'eq' && String(val) === String(rule.value)) hit = true;
+              if (rule.op === 'lte' && val <= rule.value) hit = true;
+              if (rule.op === 'gte' && val >= rule.value) hit = true;
+              if (rule.op === 'between' && (val >= rule.value && val <= rule.value2)) hit = true;
+            }
             
-            if (hit) isMatch = false; // 命中排除标准，直接淘汰
-            if (!hit && rule.desc) matchedExcDesc.push(rule.desc); // 没命中，记录下来展示
+            if (hit) isMatch = false; 
+            if (!hit && rule.desc) matchedExcDesc.push(rule.desc); 
           });
 
           if (isMatch && !isUnknown) {
             matchCount++;
             let wechatId = project.qrCodeUrl || "未填写微信号";
 
-            // 构建详情标准的 HTML
             let detailHtml = '';
             if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
               detailHtml += `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
@@ -320,16 +343,13 @@
               <div style="border: 1px solid #E0E0E0; border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
                 <h3 style="color:#0E5346; margin-bottom: 8px; font-size: 18px;">${project.name}</h3>
                 <p style="font-size: 13px; color: #666; margin-bottom: 12px;">您的指标初步符合该项目。如有意愿，请联系研究医生：</p>
-                
                 <div style="background: #F4F6F8; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: #0E5346; letter-spacing: 1px;">
                   ${wechatId}
                 </div>
-                
                 <button onclick="copyWechat('${wechatId}')" style="background: #fff; color: #0E5346; border: 1px solid #0E5346; padding: 8px 24px; border-radius: 20px; font-size: 14px; cursor: pointer;">
                   一键复制微信号
                 </button>
                 <p style="font-size: 12px; color: #999; margin-top: 12px;">复制后，请打开微信搜索添加</p>
-                
                 ${detailHtml}
               </div>
             `;
