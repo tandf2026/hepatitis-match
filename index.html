@@ -36,10 +36,7 @@
     .criteria-box { background: #f9f9f9; border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; font-size: 13px; line-height: 1.8; color: #444; white-space: pre-wrap; }
     .criteria-title { font-weight: bold; margin-bottom: 6px; color: #333; }
     .criteria-list { padding-left: 18px; color: #666; margin-bottom: 12px; }
-    
-    /* 关键修复：确保 hide 类能完全隐藏 */
     .hide { display: none !important; }
-    
     .form-section-title { font-size: 15px; color: #0E5346; font-weight: bold; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
     .form-section-title:first-child { margin-top: 0; }
   </style>
@@ -80,7 +77,6 @@
       <div class="form-group"><label>乙肝表面抗原定量 HBsAg (IU/mL) <span style="color:red">*</span></label><input type="number" id="hbsag" placeholder="例如：1200"></div>
       <div class="form-group"><label>HBV DNA 状态 <span style="color:red">*</span></label><select id="hbv_dna_status"><option value="">请选择</option><option value="检测到">检测到</option><option value="检测不到">检测不到</option><option value="不清楚">不清楚</option></select></div>
       
-      <!-- 注意这里初始有 hide 类 -->
       <div class="form-group hide" id="dna_value_group"><label>HBV DNA 定量 (IU/mL) <span style="color:red">*</span></label><input type="number" id="hbv_dna_value" placeholder="例如：50000"></div>
       
       <div class="form-group"><label>肝硬度值 (kPa)</label><input type="number" id="liver_stiffness" placeholder="例如：7.5"></div>
@@ -88,7 +84,18 @@
       <div class="form-section-title">治疗情况</div>
       <div class="form-group"><label>抗病毒治疗情况 <span style="color:red">*</span></label><select id="avt_status"><option value="">请选择</option><option value="从未抗病毒">从未抗病毒</option><option value="服用单药">服用单药药物</option><option value="服用两种药物">服用两种药物</option></select></div>
       
-      <div class="form-group hide" id="avt_duration_group"><label>总抗病毒时长 <span style="color:red">*</span></label><select id="avt_total_duration"><option value="">请选择</option><option value="<3月">《3月</option><option value="3-6月">3-6月</option><option value=">6月">》6月</option></select></div>
+      <div class="form-group hide" id="avt_duration_group">
+        <label>总抗病毒时长 <span style="color:red">*</span></label>
+        <!-- 这里加上了 >1年 的选项 -->
+        <select id="avt_total_duration">
+          <option value="">请选择</option>
+          <option value="<3月">《3月</option>
+          <option value="3-6月">3-6月</option>
+          <option value=">6月">》6月</option>
+          <option value=">1年">》1年</option>
+        </select>
+      </div>
+      
       <div class="form-group hide" id="avt_current_group"><label>当前方案时长 (月)</label><input type="number" id="avt_current_duration" placeholder="例如：12"></div>
       
       <div class="form-group"><label>干扰素使用情况 <span style="color:red">*</span></label><select id="ifn_status"><option value="">请选择</option><option value="从未使用">从未使用</option><option value="正在使用">正在使用</option><option value="已停用6月">已停用6月</option><option value="已停用1年">已停用1年</option></select></div>
@@ -171,15 +178,13 @@
       if (el) el.addEventListener(event, fn);
     };
 
-    // 【核心修复】：全部改用 classList 进行显示与隐藏
     bindEvent('hbv_dna_status', 'change', function(e) {
       const group = document.getElementById('dna_value_group');
       if(group) {
-        if (e.target.value === '检测到') {
-          group.classList.remove('hide');
-        } else {
+        if (e.target.value === '检测到') group.classList.remove('hide');
+        else {
           group.classList.add('hide');
-          document.getElementById('hbv_dna_value').value = ''; // 隐藏时清空值
+          document.getElementById('hbv_dna_value').value = '';
         }
       }
     });
@@ -343,14 +348,12 @@
             let wechatId = project.qrCodeUrl || "未填写微信号";
             let detailHtml = '';
 
-            // 优先显示后台独立文本框的完整入排
             if (project.fullCriteria && project.fullCriteria.trim() !== "") {
                detailHtml = `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
                 <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
                 <div class="criteria-box">${project.fullCriteria}</div>
               </details>`;
             } 
-            // 如果后台没填文本，则展示由 JSON 自动生成的简短描述
             else if (matchedIncDesc.length > 0 || matchedExcDesc.length > 0) {
               detailHtml += `<details style="margin-top: 16px; text-align: left; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 10px;">
                 <summary style="cursor: pointer; color: #0E5346; font-size: 14px; font-weight: bold; outline: none;">查看详细入排标准</summary>
