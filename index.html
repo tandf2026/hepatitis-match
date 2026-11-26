@@ -5,124 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>乙肝新药项目匹配</title>
   <style>
-    /* 基础重置与字体 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #F4F6F8; 
-      color: #333;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-    
-    /* 顶部导航栏 */
-    .nav-bar {
-      background: #fff;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid #EEE;
-    }
-
-    /* 页面容器 */
-    .page-container {
-      padding: 16px;
-      padding-bottom: 40px;
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #F4F6F8; color: #333; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .nav-bar { background: #fff; height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #EEE; }
+    .page-container { padding: 16px; padding-bottom: 40px; display: none; animation: fadeIn 0.3s ease-in-out; }
     .page-container.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* 首页：墨绿色主卡片 */
-    .hero-card {
-      background: linear-gradient(145deg, #144E44, #0E3A32);
-      border-radius: 16px;
-      padding: 24px 20px;
-      color: #fff;
-      box-shadow: 0 10px 20px rgba(14, 58, 50, 0.15);
-      margin-bottom: 20px;
-    }
+    .hero-card { background: linear-gradient(145deg, #144E44, #0E3A32); border-radius: 16px; padding: 24px 20px; color: #fff; box-shadow: 0 10px 20px rgba(14, 58, 50, 0.15); margin-bottom: 20px; }
     .hero-title { font-size: 24px; font-weight: bold; margin-bottom: 12px; line-height: 1.3; }
     .hero-desc { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 24px; line-height: 1.6; }
-    
-    /* 数据统计区（修改为居中单数字） */
     .stats-row { display: flex; justify-content: center; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; }
     .stat-item { display: flex; align-items: baseline; gap: 8px; }
     .stat-num { font-size: 28px; font-weight: bold; }
     .stat-label { font-size: 13px; color: rgba(255,255,255,0.7); }
-
-    /* 通用白色卡片 */
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-      margin-bottom: 16px;
-    }
+    .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
     .card-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
     .card-desc { font-size: 13px; color: #666; margin-bottom: 20px; }
-
-    /* 大按钮 */
-    .btn-primary {
-      display: block;
-      width: 100%;
-      background: #0E5346;
-      color: #fff;
-      text-align: center;
-      padding: 14px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
+    .btn-primary { display: block; width: 100%; background: #0E5346; color: #fff; text-align: center; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.2s; }
     .btn-primary:active { opacity: 0.8; }
-    .btn-secondary {
-      background: #fff;
-      color: #0E5346;
-      border: 1px solid #0E5346;
-      margin-top: 16px;
-    }
-
-    /* 表单元素 */
+    .btn-secondary { background: #fff; color: #0E5346; border: 1px solid #0E5346; margin-top: 16px; }
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #111; }
-    .form-group input, .form-group select {
-      width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA;
-      transition: border-color 0.2s;
-    }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 15px; background: #FAFAFA; }
     .form-group input:focus, .form-group select:focus { border-color: #0E5346; outline: none; background: #fff; }
-
-    /* 结果页二维码 */
     .result-qr { width: 160px; height: 160px; display: block; margin: 16px auto; border: 1px solid #eee; border-radius: 8px; }
-    
-    /* 纯列表样式 */
-    .list-item { padding: 12px 0; border-bottom: 1px solid #eee; font-size: 15px; color: #333; }
-    .list-item:last-child { border-bottom: none; }
-
-    /* 隐藏类 */
     .hide { display: none !important; }
+    .form-section-title { font-size: 15px; color: #0E5346; font-weight: bold; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+    .form-section-title:first-child { margin-top: 0; }
   </style>
 </head>
 <body>
 
-  <!-- 导航栏 -->
   <div class="nav-bar">乙肝新药项目匹配</div>
 
-  <!-- 视图 1：首页 -->
+  <!-- 首页 -->
   <div id="view-home" class="page-container active">
     <div class="hero-card">
       <div class="hero-title">乙肝新药项目匹配</div>
       <div class="hero-desc">逐条对照本中心正在开展的乙肝新药临床试验的官方入选与排除标准，比对您的病毒学、肝功能与病史信息。</div>
-      
       <div class="stats-row">
         <div class="stat-item">
           <div class="stat-num" id="stat-active-count">--</div>
@@ -130,7 +50,6 @@
         </div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">开始条件匹配</div>
       <div class="card-desc">填写年龄、病毒学指标、用药史与基础疾病，约 3 分钟。全部信息只保存在本机。</div>
@@ -139,63 +58,45 @@
     </div>
   </div>
 
-  <!-- 视图 2：表单页 -->
+  <!-- 表单页 -->
   <div id="view-form" class="page-container">
     <div class="card">
-      <div class="card-title">填写检验报告</div>
+      <div class="card-title">填写检验报告及病史</div>
       <div class="card-desc">请根据您近期的化验单如实填写。带 <span style="color:red">*</span> 为必填项。</div>
       
-      <div class="form-group">
-        <label>年龄 (岁) <span style="color:red">*</span></label>
-        <input type="number" id="age" placeholder="例如：35">
-      </div>
+      <div class="form-section-title">基本信息</div>
+      <div class="form-group"><label>年龄 (岁) <span style="color:red">*</span></label><input type="number" id="age" placeholder="例如：35"></div>
+      <div class="form-group"><label>性别 <span style="color:red">*</span></label><select id="sex"><option value="">请选择</option><option value="男">男</option><option value="女">女</option></select></div>
+      <div class="form-group"><label>身高 (cm)</label><input type="number" id="height" placeholder="例如：170"></div>
+      <div class="form-group"><label>体重 (kg)</label><input type="number" id="weight" placeholder="例如：65"></div>
+
+      <div class="form-section-title">病毒学与肝功能</div>
+      <div class="form-group"><label>乙肝e抗原 (HBeAg) <span style="color:red">*</span></label><select id="hbeag"><option value="">请选择</option><option value="阳性">阳性</option><option value="阴性">阴性</option><option value="不清楚">不清楚</option></select></div>
+      <div class="form-group"><label>乙肝表面抗原定量 HBsAg (IU/mL) <span style="color:red">*</span></label><input type="number" id="hbsag" placeholder="例如：1200"></div>
+      <div class="form-group"><label>HBV DNA 状态 <span style="color:red">*</span></label><select id="hbv_dna_status"><option value="">请选择</option><option value="检测到">检测到</option><option value="检测不到">检测不到</option><option value="不清楚">不清楚</option></select></div>
+      <div class="form-group hide" id="dna_value_group"><label>HBV DNA 定量 (IU/mL) <span style="color:red">*</span></label><input type="number" id="hbv_dna_value" placeholder="例如：50000"></div>
+      <div class="form-group"><label>肝硬度值 (kPa)</label><input type="number" id="liver_stiffness" placeholder="例如：7.5"></div>
+
+      <div class="form-section-title">治疗情况</div>
+      <div class="form-group"><label>抗病毒治疗情况 <span style="color:red">*</span></label><select id="avt_status"><option value="">请选择</option><option value="从未抗病毒">从未抗病毒</option><option value="服用单药">服用单药药物</option><option value="服用两种药物">服用两种药物</option></select></div>
+      <div class="form-group hide" id="avt_duration_group"><label>总抗病毒时长 <span style="color:red">*</span></label><select id="avt_total_duration"><option value="">请选择</option><option value="<3月">《3月</option><option value="3-6月">3-6月</option><option value=">6月">》6月</option></select></div>
+      <div class="form-group hide" id="avt_current_group"><label>当前方案时长 (月)</label><input type="number" id="avt_current_duration" placeholder="例如：12"></div>
       
-      <div class="form-group">
-        <label>乙肝e抗原 (HBeAg) <span style="color:red">*</span></label>
-        <select id="hbeag">
-          <option value="">请选择</option>
-          <option value="阳性">阳性</option>
-          <option value="阴性">阴性</option>
-          <option value="不清楚">不清楚</option>
-        </select>
-      </div>
+      <div class="form-group"><label>干扰素使用情况 <span style="color:red">*</span></label><select id="ifn_status"><option value="">请选择</option><option value="从未使用">从未使用</option><option value="正在使用">正在使用</option><option value="已停用6月">已停用6月</option><option value="已停用1年">已停用1年</option></select></div>
 
-      <div class="form-group">
-        <label>乙肝表面抗原定量 HBsAg (IU/mL) <span style="color:red">*</span></label>
-        <input type="number" id="hbsag" placeholder="例如：1200">
-      </div>
-
-      <div class="form-group">
-        <label>HBV DNA 状态 <span style="color:red">*</span></label>
-        <select id="hbv_dna_status">
-          <option value="">请选择</option>
-          <option value="检测到">检测到</option>
-          <option value="检测不到">检测不到</option>
-          <option value="不清楚">不清楚</option>
-        </select>
-      </div>
-
-      <div class="form-group hide" id="dna_value_group">
-        <label>HBV DNA 定量 (IU/mL) <span style="color:red">*</span></label>
-        <input type="number" id="hbv_dna_value" placeholder="例如：50000">
-      </div>
-
-      <div class="form-group">
-        <label>是否存在肝硬化 <span style="color:red">*</span></label>
-        <select id="cirrhosis">
-          <option value="">请选择</option>
-          <option value="是">是</option>
-          <option value="否">否</option>
-          <option value="不清楚">不清楚</option>
-        </select>
-      </div>
+      <div class="form-section-title">病史与既往研究</div>
+      <div class="form-group"><label>是否存在肝硬化 <span style="color:red">*</span></label><select id="cirrhosis"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
+      <div class="form-group"><label>是否存在肝癌 <span style="color:red">*</span></label><select id="hcc"><option value="">请选择</option><option value="是">是</option><option value="否">否</option><option value="不清楚">不清楚</option></select></div>
+      <div class="form-group"><label>既往是否参加过临床研究 <span style="color:red">*</span></label><select id="prior_trial"><option value="">请选择</option><option value="是">是</option><option value="否">否</option></select></div>
+      <div class="form-group hide" id="prior_drug_group"><label>药物名称</label><input type="text" id="prior_trial_drug" placeholder="非必填"></div>
+      <div class="form-group hide" id="prior_dose_group"><label>最后一次用药距今 (月)</label><input type="number" id="prior_trial_last_dose" placeholder="例如：6"></div>
 
       <button class="btn-primary" onclick="doMatch()">开始匹配项目</button>
       <button class="btn-primary btn-secondary" onclick="switchView('view-home')">返回首页</button>
     </div>
   </div>
 
-  <!-- 视图 3：结果页 -->
+  <!-- 结果页 -->
   <div id="view-result" class="page-container">
     <div class="card">
       <div class="card-title" style="color: #0E5346;">匹配结果</div>
@@ -205,7 +106,7 @@
     </div>
   </div>
 
-  <!-- 视图 4：所有项目列表 -->
+  <!-- 项目列表页 -->
   <div id="view-list" class="page-container">
     <div class="card">
       <div class="card-title">当前在研项目列表</div>
@@ -218,73 +119,90 @@
   <script>
     let allProjects = [];
 
-    // 页面加载时获取项目数据
     fetch('projects.json?v=' + Date.now())
       .then(res => res.json())
       .then(data => {
         allProjects = Array.isArray(data) ? data : (data.projects || []);
-        // 动态计算首页“在研”数量
-        const activeCount = allProjects.filter(p => p.status === 'active').length;
-        document.getElementById('stat-active-count').innerText = activeCount;
+        document.getElementById('stat-active-count').innerText = allProjects.filter(p => p.status === 'active').length;
       })
-      .catch(err => {
-        console.error('数据加载失败', err);
-        document.getElementById('stat-active-count').innerText = '0';
-      });
+      .catch(err => console.error(err));
 
-    // 视图切换逻辑
     function switchView(viewId) {
       document.querySelectorAll('.page-container').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
       window.scrollTo(0, 0); 
     }
 
-    // 展示项目列表视图
     function showProjectList() {
       const activeProjects = allProjects.filter(p => p.status === 'active');
       const listContainer = document.getElementById('all-projects-list');
-      
       if (activeProjects.length === 0) {
         listContainer.innerHTML = '<p style="color:#666; text-align:center;">当前暂无在研项目</p>';
       } else {
-        listContainer.innerHTML = activeProjects.map(p => `
-          <div class="list-item">
-            <span style="display:inline-block; width:8px; height:8px; background:#0E5346; border-radius:50%; margin-right:8px;"></span>
-            ${p.name}
-          </div>
-        `).join('');
+        listContainer.innerHTML = activeProjects.map(p => `<div style="padding: 12px 0; border-bottom: 1px solid #eee;"><span style="display:inline-block; width:8px; height:8px; background:#0E5346; border-radius:50%; margin-right:8px;"></span>${p.name}</div>`).join('');
       }
       switchView('view-list');
     }
 
-    // 表单联动：DNA状态
+    // 动态表单联动逻辑
     document.getElementById('hbv_dna_status').addEventListener('change', function(e) {
-      const dnaGroup = document.getElementById('dna_value_group');
-      if (e.target.value === '检测到') {
-        dnaGroup.classList.remove('hide');
-      } else {
-        dnaGroup.classList.add('hide');
-        document.getElementById('hbv_dna_value').value = '';
+      document.getElementById('dna_value_group').style.display = (e.target.value === '检测到') ? 'block' : 'none';
+      if (e.target.value !== '检测到') document.getElementById('hbv_dna_value').value = '';
+    });
+    
+    document.getElementById('avt_status').addEventListener('change', function(e) {
+      const isNever = (e.target.value === '从未抗病毒' || e.target.value === '');
+      document.getElementById('avt_duration_group').style.display = isNever ? 'none' : 'block';
+      document.getElementById('avt_current_group').style.display = isNever ? 'none' : 'block';
+      if (isNever) {
+        document.getElementById('avt_total_duration').value = '';
+        document.getElementById('avt_current_duration').value = '';
       }
     });
 
-    // 执行匹配逻辑
+    document.getElementById('prior_trial').addEventListener('change', function(e) {
+      const isYes = (e.target.value === '是');
+      document.getElementById('prior_drug_group').style.display = isYes ? 'block' : 'none';
+      document.getElementById('prior_dose_group').style.display = isYes ? 'block' : 'none';
+      if (!isYes) {
+        document.getElementById('prior_trial_drug').value = '';
+        document.getElementById('prior_trial_last_dose').value = '';
+      }
+    });
+
+    // 执行匹配
     function doMatch() {
-      const patientData = {
+      const p = {
         age: parseFloat(document.getElementById('age').value),
+        sex: document.getElementById('sex').value,
+        height: parseFloat(document.getElementById('height').value) || 0,
+        weight: parseFloat(document.getElementById('weight').value) || 0,
         hbeag: document.getElementById('hbeag').value,
         hbsag: parseFloat(document.getElementById('hbsag').value),
         hbv_dna_status: document.getElementById('hbv_dna_status').value,
         hbv_dna_value: parseFloat(document.getElementById('hbv_dna_value').value) || 0,
-        cirrhosis: document.getElementById('cirrhosis').value
+        liver_stiffness: parseFloat(document.getElementById('liver_stiffness').value) || 0,
+        avt_status: document.getElementById('avt_status').value,
+        avt_total_duration: document.getElementById('avt_total_duration').value,
+        avt_current_duration: parseFloat(document.getElementById('avt_current_duration').value) || 0,
+        ifn_status: document.getElementById('ifn_status').value,
+        cirrhosis: document.getElementById('cirrhosis').value,
+        hcc: document.getElementById('hcc').value,
+        prior_trial: document.getElementById('prior_trial').value,
+        prior_trial_last_dose: parseFloat(document.getElementById('prior_trial_last_dose').value) || 0
       };
 
-      if (!patientData.age || !patientData.hbeag || !patientData.hbsag || !patientData.hbv_dna_status || !patientData.cirrhosis) {
+      // 自动计算 BMI
+      if (p.height > 0 && p.weight > 0) {
+        p.bmi = parseFloat((p.weight / ((p.height / 100) ** 2)).toFixed(1));
+      }
+
+      if (!p.age || !p.sex || !p.hbeag || !p.hbsag || !p.hbv_dna_status || !p.avt_status || !p.ifn_status || !p.cirrhosis || !p.hcc || !p.prior_trial) {
         alert("请将带 * 号的必填项填写完整");
         return;
       }
 
-      const activeProjects = allProjects.filter(p => p.status === 'active');
+      const activeProjects = allProjects.filter(x => x.status === 'active');
       let matchedHtml = '';
       let matchCount = 0;
 
@@ -293,8 +211,9 @@
         let isUnknown = false;
 
         (project.rules || []).forEach(rule => {
-          const val = patientData[rule.field];
+          const val = p[rule.field];
           if (val === '不清楚') { isUnknown = true; return; }
+          if (val === undefined || val === null) return; // 如果患者没填这个非必填项，跳过
 
           if (rule.op === 'eq' && String(val) !== String(rule.value)) isMatch = false;
           if (rule.op === 'lte' && val > rule.value) isMatch = false;
@@ -321,7 +240,6 @@
       } else {
         resultList.innerHTML = '<div style="text-align: center; padding: 20px 0; color: #666;">基于您填写的指标，目前暂无完全符合的临床试验项目。<br><br><span style="font-size:12px; color:#999;">（原因可能为您填写的数值不在当前项目的入排范围内，或部分关键指标您选择了“不清楚”）</span></div>';
       }
-
       switchView('view-result');
     }
   </script>
